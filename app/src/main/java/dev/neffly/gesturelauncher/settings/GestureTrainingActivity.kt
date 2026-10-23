@@ -132,6 +132,9 @@ class GestureTrainingActivity : BaseActivity() {
                     ?: when (pendingAction) {
                         GestureAction.OPEN_DRAWER -> getString(R.string.gesture_action_open_drawer)
                         GestureAction.QUICK_SEARCH -> getString(R.string.gesture_action_quick_search)
+                        GestureAction.MEDIA_PLAY_PAUSE -> getString(R.string.gesture_action_media_play_pause)
+                        GestureAction.MEDIA_NEXT -> getString(R.string.gesture_action_media_next)
+                        GestureAction.MEDIA_PREVIOUS -> getString(R.string.gesture_action_media_previous)
                         else -> pendingUrl.orEmpty()
                     }
                 showDraw()
@@ -369,8 +372,8 @@ class GestureTrainingActivity : BaseActivity() {
         private const val MODE_CHANGE_APP = "change_app"
 
         /** [action] defaults to [GestureAction.LAUNCH_APP] (today's existing app-picker flow).
-         *  [url]/[label] are only meaningful for [GestureAction.OPEN_URL] — [label] is what the
-         *  draw step and the saved gesture list will display (typically the URL's host). */
+         *  [url] is only meaningful for [GestureAction.OPEN_URL]; [label] is what the draw step
+         *  and the saved gesture list will display. */
         fun newGestureIntent(
             context: Context,
             action: GestureAction = GestureAction.LAUNCH_APP,

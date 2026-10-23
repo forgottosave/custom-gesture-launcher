@@ -1,5 +1,6 @@
 package dev.neffly.gesturelauncher.data
 
+import android.annotation.SuppressLint
 import android.graphics.PointF
 import dev.neffly.gesturelauncher.unistroke.GestureTemplate
 import dev.neffly.gesturelauncher.unistroke.Pt
@@ -12,7 +13,15 @@ data class SPoint(val x: Float, val y: Float)
 /** What a recognized gesture does. Defaults to [LAUNCH_APP] so gesture files saved before this
  *  field existed still decode as plain app launches, unchanged. */
 @Serializable
-enum class GestureAction { LAUNCH_APP, OPEN_DRAWER, OPEN_URL, QUICK_SEARCH }
+enum class GestureAction {
+    LAUNCH_APP,
+    OPEN_DRAWER,
+    OPEN_URL,
+    QUICK_SEARCH,
+    MEDIA_PLAY_PAUSE,
+    MEDIA_NEXT,
+    MEDIA_PREVIOUS
+}
 
 /**
  * One gesture -> action mapping. Stores the raw strokes from the 3x training pass as separate
@@ -20,8 +29,9 @@ enum class GestureAction { LAUNCH_APP, OPEN_DRAWER, OPEN_URL, QUICK_SEARCH }
  *
  * [packageName]/[componentName] are only meaningful for [GestureAction.LAUNCH_APP] (empty string
  * otherwise); [url] is only set for [GestureAction.OPEN_URL]. [label] is a free-form display
- * string reused for all three action types (the app's name, "Open Drawer", or the URL's host).
+ * string reused for all action types (the app's name, built-in action name, or the URL's host).
  */
+@SuppressLint("UnsafeOptInUsageError")
 @Serializable
 data class GestureMapping(
     val id: String,

@@ -17,8 +17,8 @@ persistence, min SDK 26 (Android 8.0+).
 
 - **Draw-to-launch**: a Protractor-variant $1 unistroke recognizer matches single-stroke shapes
   against your saved gestures — no on-screen icons required.
-- Gestures can also **open the app drawer**, **open a URL**, or **open the floating search**, not
-  just launch an app.
+- Gestures can also **open the app drawer**, **open a URL**, **open the floating search**, or
+  control media playback with **play/pause**, **next**, and **previous**, not just launch an app.
 - A visible **halo trail** follows your finger while drawing, and haptic feedback (toggleable)
   confirms a match.
 - **Unified search** over installed apps, local files and the web, ranked by one fuzzy matcher so
@@ -87,8 +87,9 @@ pick Gessearch Launcher as your digital assistant — both are off until you gra
 
 ## Known limitations
 
-- Gesture actions are currently limited to launching an app, opening the drawer, opening a URL, or
-  opening the floating search (no pinned shortcuts or contact call/text actions yet).
+- Gesture actions are currently limited to launching an app, opening the drawer, opening a URL,
+  opening the floating search, or controlling media playback (no pinned shortcuts or contact
+  call/text actions yet).
 - File search only sees files the media scanner has indexed; anything it hasn't reached is
   invisible to the search box.
 - Floating windows depend on the device reporting freeform-window support, and OEM skins keep

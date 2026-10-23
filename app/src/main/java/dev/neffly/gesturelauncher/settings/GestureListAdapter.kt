@@ -63,6 +63,9 @@ class GestureListAdapter(
             GestureAction.OPEN_DRAWER -> bindBuiltInIcon(holder, R.drawable.ic_apps)
             GestureAction.OPEN_URL -> bindBuiltInIcon(holder, R.drawable.ic_link)
             GestureAction.QUICK_SEARCH -> bindBuiltInIcon(holder, R.drawable.ic_search)
+            GestureAction.MEDIA_PLAY_PAUSE -> bindBuiltInIcon(holder, R.drawable.ic_media_play_pause)
+            GestureAction.MEDIA_NEXT -> bindBuiltInIcon(holder, R.drawable.ic_media_next)
+            GestureAction.MEDIA_PREVIOUS -> bindBuiltInIcon(holder, R.drawable.ic_media_previous)
         }
     }
 

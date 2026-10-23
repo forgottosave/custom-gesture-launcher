@@ -41,6 +41,15 @@ class GestureActionChooserActivity : SlidePanelActivity() {
         findViewById<View>(R.id.openUrlRow).setOnClickListener {
             goTo(Intent(this, GestureUrlEntryActivity::class.java))
         }
+        findViewById<View>(R.id.mediaPlayPauseRow).setOnClickListener {
+            goTo(GestureTrainingActivity.newGestureIntent(this, GestureAction.MEDIA_PLAY_PAUSE))
+        }
+        findViewById<View>(R.id.mediaNextRow).setOnClickListener {
+            goTo(GestureTrainingActivity.newGestureIntent(this, GestureAction.MEDIA_NEXT))
+        }
+        findViewById<View>(R.id.mediaPreviousRow).setOnClickListener {
+            goTo(GestureTrainingActivity.newGestureIntent(this, GestureAction.MEDIA_PREVIOUS))
+        }
     }
 
     /** Chains forward to the next screen, suppressing the OS's default cross-activity transition

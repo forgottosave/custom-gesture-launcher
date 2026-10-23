@@ -4,7 +4,10 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
 import android.net.Uri
+import android.os.SystemClock
+import android.view.KeyEvent
 import android.widget.Toast
 import dev.neffly.gesturelauncher.data.GestureAction
 import dev.neffly.gesturelauncher.data.GestureMapping
@@ -51,6 +54,19 @@ object GestureActionDispatcher {
                     Toast.makeText(context, R.string.gesture_url_open_failed, Toast.LENGTH_SHORT).show()
                 }
             }
+            GestureAction.MEDIA_PLAY_PAUSE ->
+                dispatchMediaKey(context, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
+            GestureAction.MEDIA_NEXT ->
+                dispatchMediaKey(context, KeyEvent.KEYCODE_MEDIA_NEXT)
+            GestureAction.MEDIA_PREVIOUS ->
+                dispatchMediaKey(context, KeyEvent.KEYCODE_MEDIA_PREVIOUS)
         }
+    }
+
+    private fun dispatchMediaKey(context: Context, keyCode: Int) {
+        val audioManager = context.getSystemService(AudioManager::class.java) ?: return
+        val eventTime = SystemClock.uptimeMillis()
+        audioManager.dispatchMediaKeyEvent(KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, keyCode, 0))
+        audioManager.dispatchMediaKeyEvent(KeyEvent(eventTime, eventTime, KeyEvent.ACTION_UP, keyCode, 0))
     }
 }

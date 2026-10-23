@@ -102,6 +102,12 @@
     <string name="gesture_action_open_url_subtitle">Draw a shape, open a link in your browser</string>
     <string name="gesture_action_quick_search">Open quick search</string>
     <string name="gesture_action_quick_search_subtitle">Draw a shape, open the floating search bar</string>
+    <string name="gesture_action_media_play_pause">Play or pause media</string>
+    <string name="gesture_action_media_play_pause_subtitle">Draw a shape, toggle the active player</string>
+    <string name="gesture_action_media_next">Next song</string>
+    <string name="gesture_action_media_next_subtitle">Draw a shape, skip to the next track</string>
+    <string name="gesture_action_media_previous">Previous song</string>
+    <string name="gesture_action_media_previous_subtitle">Draw a shape, return to the previous track</string>
     <string name="gesture_url_entry_title">Open a URL</string>
     <string name="gesture_url_hint">example.com</string>
     <string name="gesture_url_empty">Enter a URL</string>
