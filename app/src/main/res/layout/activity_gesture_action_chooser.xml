@@ -15,6 +15,17 @@
         app:navigationIcon="@drawable/ic_arrow_back"
         app:title="@string/gesture_action_chooser_title" />
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
     <LinearLayout
         android:id="@+id/pickAppRow"
         android:layout_width="match_parent"
@@ -197,4 +208,6 @@
 
     </LinearLayout>
 
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>
