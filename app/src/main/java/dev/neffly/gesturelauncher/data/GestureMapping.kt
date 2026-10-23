@@ -47,7 +47,9 @@ data class GestureMapping(
      *  true for gestures saved before this field existed. */
     val subStrokeLengths: List<List<Int>> = emptyList(),
     val action: GestureAction = GestureAction.LAUNCH_APP,
-    val url: String? = null
+    val url: String? = null,
+    /** Optional gesture to recognize next instead of dispatching this mapping's action. */
+    val nextGestureId: String? = null
 )
 
 /**

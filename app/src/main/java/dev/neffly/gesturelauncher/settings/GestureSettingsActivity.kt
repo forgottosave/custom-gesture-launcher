@@ -3,6 +3,7 @@ package dev.neffly.gesturelauncher.settings
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +17,7 @@ import dev.neffly.gesturelauncher.data.GestureStore
 import dev.neffly.gesturelauncher.ui.BaseActivity
 import dev.neffly.gesturelauncher.ui.FontEngine
 import dev.neffly.gesturelauncher.ui.GlassMenu
+import dev.neffly.gesturelauncher.ui.showWithFont
 import dev.neffly.gesturelauncher.ui.overrideNextTransition
 
 /** Management hub: list existing gestures, add new ones, edit (redraw / change app) and delete. */
@@ -74,11 +76,36 @@ class GestureSettingsActivity : BaseActivity() {
                 GestureAction.MEDIA_NEXT,
                 GestureAction.MEDIA_PREVIOUS -> {}
             }
+            add(GlassMenu.item(
+                anchor,
+                if (mapping.nextGestureId == null) R.string.configure_second_gesture
+                else R.string.change_second_gesture,
+                R.drawable.ic_gesture
+            ) {
+                chooseSecondGesture(mapping)
+            })
             add(GlassMenu.item(anchor, R.string.delete, R.drawable.ic_delete, destructive = true) {
                 deleteWithUndo(mapping)
             })
         }
         GlassMenu.show(anchor, items, xOffsetDp = MENU_INSET_DP)
+    }
+
+    private fun chooseSecondGesture(mapping: GestureMapping) {
+        val choices = GestureStore.all(this).filter { it.id != mapping.id }
+        val labels = (listOf(getString(R.string.no_second_gesture)) + choices.map { it.label }).toTypedArray()
+        val selected = choices.indexOfFirst { it.id == mapping.nextGestureId } + 1
+        AlertDialog.Builder(this)
+            .setTitle(R.string.configure_second_gesture)
+            .setSingleChoiceItems(labels, selected) { dialog, which ->
+                GestureStore.update(
+                    this,
+                    mapping.copy(nextGestureId = choices.getOrNull(which - 1)?.id)
+                )
+                dialog.dismiss()
+                refresh()
+            }
+            .showWithFont()
     }
 
     private fun deleteWithUndo(mapping: GestureMapping) {

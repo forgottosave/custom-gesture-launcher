@@ -23,6 +23,7 @@ object Prefs {
     private const val KEY_QUICK_SEARCH = "quick_search_enabled"
     private const val KEY_KEYBOARD_SHORTCUT = "keyboard_shortcut_enabled"
     private const val KEY_SEARCH_ON_LEFT = "search_on_left"
+    private const val KEY_MULTI_STEP_GESTURES = "multi_step_gestures"
 
     /** Repeated crashes before the home screen drops into Safe Mode. */
     const val SAFE_MODE_CRASH_LIMIT = 3
@@ -150,5 +151,13 @@ object Prefs {
 
     fun setSearchOnLeft(context: Context, value: Boolean) {
         prefs(context).edit().putBoolean(KEY_SEARCH_ON_LEFT, value).apply()
+    }
+
+    /** Whether linked follow-up gestures are active (default ON). */
+    fun multiStepGestures(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_MULTI_STEP_GESTURES, true)
+
+    fun setMultiStepGestures(context: Context, value: Boolean) {
+        prefs(context).edit().putBoolean(KEY_MULTI_STEP_GESTURES, value).apply()
     }
 }

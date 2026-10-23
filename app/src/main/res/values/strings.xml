@@ -136,6 +136,12 @@
     <string name="gesture_sensitivity_title">Adjust gesture sensitivity</string>
     <string name="sensitivity_message">Higher = stricter matching (fewer wrong launches). Lower = more forgiving.</string>
     <string name="sensitivity_row_subtitle">Tune the match threshold and test gestures live</string>
+    <string name="multi_step_gestures">Two-step gestures</string>
+    <string name="multi_step_gestures_subtitle">Recognize a follow-up gesture after a linked gesture</string>
+    <string name="configure_second_gesture">Configure second gesture</string>
+    <string name="change_second_gesture">Change second gesture</string>
+    <string name="no_second_gesture">No second gesture</string>
+    <string name="gesture_second_step_hint">Draw the second gesture</string>
 
     <string name="test_hint">Draw a gesture to see what it would match, without launching anything</string>
     <string name="test_no_gestures">No gestures saved yet</string>

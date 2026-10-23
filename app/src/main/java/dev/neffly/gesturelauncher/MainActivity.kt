@@ -109,6 +109,7 @@ class MainActivity : BaseActivity() {
     /** Preprocessed templates + id->mapping lookup, rebuilt whenever gestures may have changed. */
     private var templates: List<GestureTemplate> = emptyList()
     private var mappingsById: Map<String, GestureMapping> = emptyMap()
+    private var pendingSecondGestureId: String? = null
 
     private val requestCalendar =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -467,6 +468,7 @@ class MainActivity : BaseActivity() {
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(heartbeat)
+        cancelPendingSecondGesture()
     }
 
     // --- gestures ---------------------------------------------------------
@@ -482,6 +484,9 @@ class MainActivity : BaseActivity() {
             if (mappings.anyMultiStroke()) GestureCanvasView.MULTI_STROKE_GAP_MILLIS else 0L
         canvas.maxExpectedSubStrokes = mappings.maxExpectedSubStrokes()
         emptyHint.visibility = if (mappings.isEmpty()) View.VISIBLE else View.GONE
+        if (pendingSecondGestureId != null && mappingsById[pendingSecondGestureId] == null) {
+            cancelPendingSecondGesture()
+        }
     }
 
     private fun onHomeStroke(points: List<android.graphics.PointF>, subStrokeCount: Int) {
@@ -490,12 +495,23 @@ class MainActivity : BaseActivity() {
         // Not long/deliberate enough to be a real attempt — stay silent (no hint, no haptic), the
         // trail just auto-clears. Only strokes past this floor are treated as "the user tried to
         // draw something" for the purposes of the not-recognized hint below.
-        if (!OneDollarRecognizer.isStrokeUsable(pts)) return
+        if (!OneDollarRecognizer.isStrokeUsable(pts)) {
+            if (pendingSecondGestureId != null) cancelPendingSecondGesture()
+            return
+        }
 
-        val result = OneDollarRecognizer.recognize(pts, templates, subStrokeCount)
+        val awaitingSecond = pendingSecondGestureId != null
+        val candidates = pendingSecondGestureId?.let { id ->
+            templates.filter { it.name == id }
+        } ?: templates
+        val result = OneDollarRecognizer.recognize(pts, candidates, subStrokeCount)
         val threshold = Prefs.matchThreshold(this)
         val mapping = result.name?.let { mappingsById[it] }
         if (mapping != null && result.score >= threshold) {
+            if (awaitingSecond) {
+                pendingSecondGestureId = null
+                handler.removeCallbacks(secondGestureTimeout)
+            }
             hideRecognitionHint()
             if (Prefs.hapticFeedback(this)) {
                 // Instant confirmation that something is happening — the app window (or whatever
@@ -508,9 +524,41 @@ class MainActivity : BaseActivity() {
                     }
                 )
             }
-            GestureActionDispatcher.perform(this, mapping)
+            if (awaitingSecond) {
+                GestureActionDispatcher.perform(this, mapping)
+            } else {
+                enterSecondGesture(mapping)
+            }
+        } else if (awaitingSecond) {
+            cancelPendingSecondGesture()
+            showRecognitionHint()
         } else {
             showRecognitionHint()
+        }
+    }
+
+    private fun enterSecondGesture(mapping: GestureMapping) {
+        if (!Prefs.multiStepGestures(this)) {
+            GestureActionDispatcher.perform(this, mapping)
+            return
+        }
+        val nextId = mapping.nextGestureId
+        if (nextId == null || mappingsById[nextId] == null) {
+            GestureActionDispatcher.perform(this, mapping)
+            return
+        }
+        pendingSecondGestureId = nextId
+        handler.removeCallbacks(secondGestureTimeout)
+        handler.postDelayed(secondGestureTimeout, SECOND_GESTURE_TIMEOUT_MILLIS)
+        recognitionHint.text = getString(R.string.gesture_second_step_hint)
+        recognitionHint.visibility = View.VISIBLE
+    }
+
+    private fun cancelPendingSecondGesture() {
+        pendingSecondGestureId = null
+        handler.removeCallbacks(secondGestureTimeout)
+        if (recognitionHint.text == getString(R.string.gesture_second_step_hint)) {
+            hideRecognitionHint()
         }
     }
 
@@ -527,6 +575,10 @@ class MainActivity : BaseActivity() {
     }
 
     private val hideHintRunnable = Runnable { recognitionHint.visibility = View.GONE }
+    private val secondGestureTimeout = Runnable {
+        pendingSecondGestureId = null
+        hideRecognitionHint()
+    }
 
     // --- calendar widget --------------------------------------------------
 
@@ -753,6 +805,7 @@ class MainActivity : BaseActivity() {
         private const val EVENTS_TTL_MILLIS = 5 * 60_000L
         private const val CALENDAR_DEBOUNCE_MILLIS = 500L
         private const val RECOGNITION_HINT_MILLIS = 1200L
+        private const val SECOND_GESTURE_TIMEOUT_MILLIS = 3000L
 
         /** Known clock/alarm packages, tried in order when ACTION_SHOW_ALARMS can't be dispatched. */
         private val CLOCK_PACKAGES = listOf(

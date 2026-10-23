@@ -46,6 +46,7 @@ class SettingsHubActivity : SlidePanelActivity() {
     private lateinit var gesturesSubtitle: TextView
     private lateinit var autoKeyboardSwitch: MaterialSwitch
     private lateinit var hapticFeedbackSwitch: MaterialSwitch
+    private lateinit var multiStepSwitch: MaterialSwitch
     private lateinit var searchSideSubtitle: TextView
     private lateinit var themeSubtitle: TextView
     private lateinit var batterySubtitle: TextView
@@ -110,6 +111,12 @@ class SettingsHubActivity : SlidePanelActivity() {
         }
         findViewById<View>(R.id.sensitivityRow).setOnClickListener {
             startActivity(Intent(this, GestureSensitivityActivity::class.java))
+        }
+        multiStepSwitch = findViewById(R.id.multiStepSwitch)
+        findViewById<View>(R.id.multiStepRow).setOnClickListener {
+            val enabled = !Prefs.multiStepGestures(this)
+            Prefs.setMultiStepGestures(this, enabled)
+            multiStepSwitch.isChecked = enabled
         }
         findViewById<View>(R.id.exportRow).setOnClickListener {
             exportLauncher.launch("gesture-launcher-backup.json")
@@ -197,6 +204,7 @@ class SettingsHubActivity : SlidePanelActivity() {
         gesturesSubtitle.text = getString(R.string.gestures_row_subtitle, GestureStore.all(this).size)
         autoKeyboardSwitch.isChecked = Prefs.autoKeyboard(this)
         hapticFeedbackSwitch.isChecked = Prefs.hapticFeedback(this)
+        multiStepSwitch.isChecked = Prefs.multiStepGestures(this)
         searchSideSubtitle.setText(searchSideLabel(Prefs.searchOnLeft(this)))
         themeSubtitle.setText(themeLabelFor(Prefs.themeMode(this)))
         // Re-read on every resume, not just at create: the usual flow is tapping the row, changing

@@ -47,6 +47,9 @@ object GestureStore {
     fun remove(context: Context, id: String) {
         val list = load(context)
         list.removeAll { it.id == id }
+        list.replaceAll { mapping ->
+            if (mapping.nextGestureId == id) mapping.copy(nextGestureId = null) else mapping
+        }
         save(context, list)
     }
 
