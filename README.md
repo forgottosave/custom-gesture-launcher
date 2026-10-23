@@ -58,9 +58,11 @@ Grab the latest APK from this repo's [Releases](../../releases) page and sideloa
 to allow installs from your file manager / browser in Android's settings). There's no Play Store
 listing.
 
+<!--
 To get updates automatically, add the repo to [Obtainium](https://github.com/ImranR98/Obtainium):
 **Add App** → paste `https://github.com/JinWei225/custom-gesture-launcher` → **Add**. Every
 release carries one signed APK, so Obtainium needs no further configuration.
+-->
 
 Releases are signed with a dedicated key. A copy built from source in Android Studio is signed
 with your own debug key instead, and Android won't install one over the other — uninstall first
@@ -79,7 +81,7 @@ when switching between the two.
 
 ## First use
 
-The launcher ships with **no gestures**. Long-press the bottom-right button to open the drawer →
+The launcher ships with **no gestures**. Press the bottom-right button to open the drawer →
 gear icon → **Gesture settings** → **+** → choose what the gesture should do → draw the shape 3× →
 save. Then draw it anywhere on the home screen to trigger it. Tune matching strictness under
 **Recognition sensitivity**.
@@ -87,6 +89,10 @@ save. Then draw it anywhere on the home screen to trigger it. Tune matching stri
 The same settings hub is where you turn on file/web search, the floating search window, a custom
 font, and the theme. File search asks for all-files access, and the floating search needs you to
 pick TGesearch Launcher as your digital assistant — both are off until you grant them deliberately.
+
+## Nice tricks
+- Add a URL shape with the link `spotify:collection:tracks` to open your Liked Songs in Spotify, or the link form "share playlist" to open a playlist.
+- Add 2-layer gestures: one for the first stroke, and a second for the follow-up stroke. The second stroke can be any of the supported actions, so you can have a "folder" gesture that branches into multiple actions.
 
 ## Known limitations
 
