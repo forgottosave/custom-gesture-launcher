@@ -15,7 +15,7 @@
      screen: the shortcut needs to know that a key was pressed, never what is on top of it. -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged"
-    android:packageNames="dev.neffly.gesturelauncher"
+    android:packageNames="dev.neffly.tgesearchlauncher"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags="flagRequestFilterKeyEvents"
     android:canRequestFilterKeyEvents="true"

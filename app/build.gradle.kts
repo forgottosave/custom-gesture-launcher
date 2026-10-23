@@ -20,7 +20,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "dev.neffly.gesturelauncher"
+        applicationId = "dev.neffly.tgesearchlauncher"
         minSdk = 26
         // API 36 (Android 16) is what Google Play requires of new apps and updates as of August
         // 2026. API 37 exists and is stable, but its behaviour changes only take effect on an
