@@ -57,6 +57,7 @@ class GestureListAdapter(
         holder.iconJob?.cancel()
         holder.boundId = mapping.id
         when (mapping.action) {
+            GestureAction.TWO_STEP_FOLDER -> bindBuiltInIcon(holder, R.drawable.ic_gesture)
             // The only action whose icon isn't a fixed drawable, and the only one that can be
             // missing: the app a gesture was trained against may have been uninstalled since.
             GestureAction.LAUNCH_APP -> bindAppIcon(holder, mapping)

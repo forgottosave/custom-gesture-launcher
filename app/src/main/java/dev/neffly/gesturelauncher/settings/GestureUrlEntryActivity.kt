@@ -67,7 +67,8 @@ class GestureUrlEntryActivity : SlidePanelActivity() {
 
         startActivity(
             GestureTrainingActivity.newGestureIntent(
-                this, GestureAction.OPEN_URL, url = normalized, label = hostLabel(normalized)
+                this, GestureAction.OPEN_URL, url = normalized, label = hostLabel(normalized),
+                parentGestureId = intent.getStringExtra(EXTRA_PARENT_ID)
             )
         )
         overrideNextTransition()
@@ -84,6 +85,7 @@ class GestureUrlEntryActivity : SlidePanelActivity() {
 
     companion object {
         private const val EXTRA_MAPPING_ID = "mapping_id"
+        private const val EXTRA_PARENT_ID = "parent_gesture_id"
 
         fun editIntent(context: Context, mappingId: String): Intent =
             Intent(context, GestureUrlEntryActivity::class.java)

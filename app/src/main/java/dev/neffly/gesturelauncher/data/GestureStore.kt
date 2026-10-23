@@ -46,10 +46,8 @@ object GestureStore {
     @Synchronized
     fun remove(context: Context, id: String) {
         val list = load(context)
-        list.removeAll { it.id == id }
-        list.replaceAll { mapping ->
-            if (mapping.nextGestureId == id) mapping.copy(nextGestureId = null) else mapping
-        }
+        val removedIds = list.filter { it.id == id || it.parentGestureId == id }.map { it.id }.toSet()
+        list.removeAll { it.id in removedIds }
         save(context, list)
     }
 

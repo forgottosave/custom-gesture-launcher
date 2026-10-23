@@ -24,31 +24,39 @@ class GestureActionChooserActivity : SlidePanelActivity() {
         super.onCreate(savedInstanceState)
         overrideOwnTransitions()
         setContentView(R.layout.activity_gesture_action_chooser)
+        if (intent.getStringExtra(EXTRA_PARENT_ID) != null) {
+            findViewById<View>(R.id.twoStepFolderRow).visibility = View.GONE
+        }
 
         slideIn(findViewById(R.id.chooserRoot), savedInstanceState)
 
         findViewById<MaterialToolbar>(R.id.toolbar).setNavigationOnClickListener { finish() }
 
         findViewById<View>(R.id.pickAppRow).setOnClickListener {
-            goTo(GestureTrainingActivity.newGestureIntent(this, GestureAction.LAUNCH_APP))
+            goTo(newTrainingIntent(GestureAction.LAUNCH_APP))
         }
         findViewById<View>(R.id.openDrawerRow).setOnClickListener {
-            goTo(GestureTrainingActivity.newGestureIntent(this, GestureAction.OPEN_DRAWER))
+            goTo(newTrainingIntent(GestureAction.OPEN_DRAWER))
         }
         findViewById<View>(R.id.quickSearchRow).setOnClickListener {
-            goTo(GestureTrainingActivity.newGestureIntent(this, GestureAction.QUICK_SEARCH))
+            goTo(newTrainingIntent(GestureAction.QUICK_SEARCH))
         }
         findViewById<View>(R.id.openUrlRow).setOnClickListener {
-            goTo(Intent(this, GestureUrlEntryActivity::class.java))
+            goTo(Intent(this, GestureUrlEntryActivity::class.java)
+                .putExtra(EXTRA_PARENT_ID, intent.getStringExtra(EXTRA_PARENT_ID)))
         }
         findViewById<View>(R.id.mediaPlayPauseRow).setOnClickListener {
-            goTo(GestureTrainingActivity.newGestureIntent(this, GestureAction.MEDIA_PLAY_PAUSE))
+            goTo(newTrainingIntent(GestureAction.MEDIA_PLAY_PAUSE))
         }
         findViewById<View>(R.id.mediaNextRow).setOnClickListener {
-            goTo(GestureTrainingActivity.newGestureIntent(this, GestureAction.MEDIA_NEXT))
+            goTo(newTrainingIntent(GestureAction.MEDIA_NEXT))
         }
         findViewById<View>(R.id.mediaPreviousRow).setOnClickListener {
-            goTo(GestureTrainingActivity.newGestureIntent(this, GestureAction.MEDIA_PREVIOUS))
+            goTo(newTrainingIntent(GestureAction.MEDIA_PREVIOUS))
+        }
+        findViewById<View>(R.id.twoStepFolderRow).setOnClickListener {
+            goTo(GestureTrainingActivity.newGestureIntent(this, GestureAction.TWO_STEP_FOLDER,
+                parentGestureId = intent.getStringExtra(EXTRA_PARENT_ID)))
         }
     }
 
@@ -58,5 +66,18 @@ class GestureActionChooserActivity : SlidePanelActivity() {
     private fun goTo(intent: Intent) {
         startActivity(intent)
         overrideNextTransition()
+    }
+
+    private fun newTrainingIntent(action: GestureAction): Intent =
+        GestureTrainingActivity.newGestureIntent(
+            this, action, parentGestureId = intent.getStringExtra(EXTRA_PARENT_ID)
+        )
+
+    companion object {
+        private const val EXTRA_PARENT_ID = "parent_gesture_id"
+
+        fun newIntent(context: android.content.Context, parentGestureId: String? = null): Intent =
+            Intent(context, GestureActionChooserActivity::class.java)
+                .putExtra(EXTRA_PARENT_ID, parentGestureId)
     }
 }

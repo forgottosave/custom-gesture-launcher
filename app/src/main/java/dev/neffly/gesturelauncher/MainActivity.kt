@@ -109,7 +109,7 @@ class MainActivity : BaseActivity() {
     /** Preprocessed templates + id->mapping lookup, rebuilt whenever gestures may have changed. */
     private var templates: List<GestureTemplate> = emptyList()
     private var mappingsById: Map<String, GestureMapping> = emptyMap()
-    private var pendingSecondGestureId: String? = null
+    private var pendingFolderId: String? = null
 
     private val requestCalendar =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -468,7 +468,7 @@ class MainActivity : BaseActivity() {
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(heartbeat)
-        cancelPendingSecondGesture()
+        cancelPendingFolder()
     }
 
     // --- gestures ---------------------------------------------------------
@@ -484,8 +484,8 @@ class MainActivity : BaseActivity() {
             if (mappings.anyMultiStroke()) GestureCanvasView.MULTI_STROKE_GAP_MILLIS else 0L
         canvas.maxExpectedSubStrokes = mappings.maxExpectedSubStrokes()
         emptyHint.visibility = if (mappings.isEmpty()) View.VISIBLE else View.GONE
-        if (pendingSecondGestureId != null && mappingsById[pendingSecondGestureId] == null) {
-            cancelPendingSecondGesture()
+        if (pendingFolderId != null && mappingsById[pendingFolderId] == null) {
+            cancelPendingFolder()
         }
     }
 
@@ -496,21 +496,21 @@ class MainActivity : BaseActivity() {
         // trail just auto-clears. Only strokes past this floor are treated as "the user tried to
         // draw something" for the purposes of the not-recognized hint below.
         if (!OneDollarRecognizer.isStrokeUsable(pts)) {
-            if (pendingSecondGestureId != null) cancelPendingSecondGesture()
+            if (pendingFolderId != null) cancelPendingFolder()
             return
         }
 
-        val awaitingSecond = pendingSecondGestureId != null
-        val candidates = pendingSecondGestureId?.let { id ->
-            templates.filter { it.name == id }
-        } ?: templates
+        val awaitingFolder = pendingFolderId != null
+        val candidates = pendingFolderId?.let { id ->
+            templates.filter { mappingsById[it.name]?.parentGestureId == id }
+        } ?: templates.filter { mappingsById[it.name]?.parentGestureId == null }
         val result = OneDollarRecognizer.recognize(pts, candidates, subStrokeCount)
         val threshold = Prefs.matchThreshold(this)
         val mapping = result.name?.let { mappingsById[it] }
         if (mapping != null && result.score >= threshold) {
-            if (awaitingSecond) {
-                pendingSecondGestureId = null
-                handler.removeCallbacks(secondGestureTimeout)
+            if (awaitingFolder) {
+                pendingFolderId = null
+                handler.removeCallbacks(folderTimeout)
             }
             hideRecognitionHint()
             if (Prefs.hapticFeedback(this)) {
@@ -524,39 +524,42 @@ class MainActivity : BaseActivity() {
                     }
                 )
             }
-            if (awaitingSecond) {
+            if (awaitingFolder) {
                 GestureActionDispatcher.perform(this, mapping)
             } else {
-                enterSecondGesture(mapping)
+                enterFolder(mapping)
             }
-        } else if (awaitingSecond) {
-            cancelPendingSecondGesture()
+        } else if (awaitingFolder) {
+            cancelPendingFolder()
             showRecognitionHint()
         } else {
             showRecognitionHint()
         }
     }
 
-    private fun enterSecondGesture(mapping: GestureMapping) {
+    private fun enterFolder(mapping: GestureMapping) {
         if (!Prefs.multiStepGestures(this)) {
+            if (mapping.action != dev.neffly.gesturelauncher.data.GestureAction.TWO_STEP_FOLDER) {
+                GestureActionDispatcher.perform(this, mapping)
+            }
+            return
+        }
+        if (mapping.action != dev.neffly.gesturelauncher.data.GestureAction.TWO_STEP_FOLDER ||
+            !mappingsById.values.any { it.parentGestureId == mapping.id }
+        ) {
             GestureActionDispatcher.perform(this, mapping)
             return
         }
-        val nextId = mapping.nextGestureId
-        if (nextId == null || mappingsById[nextId] == null) {
-            GestureActionDispatcher.perform(this, mapping)
-            return
-        }
-        pendingSecondGestureId = nextId
-        handler.removeCallbacks(secondGestureTimeout)
-        handler.postDelayed(secondGestureTimeout, SECOND_GESTURE_TIMEOUT_MILLIS)
+        pendingFolderId = mapping.id
+        handler.removeCallbacks(folderTimeout)
+        handler.postDelayed(folderTimeout, SECOND_GESTURE_TIMEOUT_MILLIS)
         recognitionHint.text = getString(R.string.gesture_second_step_hint)
         recognitionHint.visibility = View.VISIBLE
     }
 
-    private fun cancelPendingSecondGesture() {
-        pendingSecondGestureId = null
-        handler.removeCallbacks(secondGestureTimeout)
+    private fun cancelPendingFolder() {
+        pendingFolderId = null
+        handler.removeCallbacks(folderTimeout)
         if (recognitionHint.text == getString(R.string.gesture_second_step_hint)) {
             hideRecognitionHint()
         }
@@ -575,8 +578,8 @@ class MainActivity : BaseActivity() {
     }
 
     private val hideHintRunnable = Runnable { recognitionHint.visibility = View.GONE }
-    private val secondGestureTimeout = Runnable {
-        pendingSecondGestureId = null
+    private val folderTimeout = Runnable {
+        pendingFolderId = null
         hideRecognitionHint()
     }
 

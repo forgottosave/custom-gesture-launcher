@@ -29,6 +29,7 @@ object GestureActionDispatcher {
      */
     fun perform(context: Context, mapping: GestureMapping) {
         when (mapping.action) {
+            GestureAction.TWO_STEP_FOLDER -> Unit
             GestureAction.LAUNCH_APP ->
                 ComponentName.unflattenFromString(mapping.componentName)?.let { comp ->
                     AppRepository.launch(context, comp)

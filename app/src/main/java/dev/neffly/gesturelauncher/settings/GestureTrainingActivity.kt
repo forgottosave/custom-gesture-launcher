@@ -75,6 +75,7 @@ class GestureTrainingActivity : BaseActivity() {
      *  [editingMapping]) and for CHANGE_APP (always [GestureAction.LAUNCH_APP] by construction). */
     private var pendingAction: GestureAction = GestureAction.LAUNCH_APP
     private var pendingUrl: String? = null
+    private var parentGestureId: String? = null
 
     private val strokes = ArrayList<List<SPoint>>()
     private val strokeSubLengths = ArrayList<List<Int>>()
@@ -116,6 +117,7 @@ class GestureTrainingActivity : BaseActivity() {
             ?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() }
             ?: GestureAction.LAUNCH_APP
         pendingUrl = intent.getStringExtra(EXTRA_URL)
+        parentGestureId = intent.getStringExtra(EXTRA_PARENT_ID)
 
         when (mode) {
             MODE_REDRAW -> {
@@ -135,6 +137,7 @@ class GestureTrainingActivity : BaseActivity() {
                         GestureAction.MEDIA_PLAY_PAUSE -> getString(R.string.gesture_action_media_play_pause)
                         GestureAction.MEDIA_NEXT -> getString(R.string.gesture_action_media_next)
                         GestureAction.MEDIA_PREVIOUS -> getString(R.string.gesture_action_media_previous)
+                        GestureAction.TWO_STEP_FOLDER -> getString(R.string.gesture_action_two_step_folder)
                         else -> pendingUrl.orEmpty()
                     }
                 showDraw()
@@ -347,7 +350,8 @@ class GestureTrainingActivity : BaseActivity() {
                         isMultiStroke = isMultiStroke,
                         subStrokeLengths = strokeSubLengths.toList(),
                         action = pendingAction,
-                        url = pendingUrl
+                        url = pendingUrl,
+                        parentGestureId = parentGestureId
                     )
                 )
             }
@@ -367,6 +371,7 @@ class GestureTrainingActivity : BaseActivity() {
         private const val EXTRA_ACTION = "action"
         private const val EXTRA_URL = "url"
         private const val EXTRA_LABEL = "label"
+        private const val EXTRA_PARENT_ID = "parent_gesture_id"
         private const val MODE_NEW = "new"
         private const val MODE_REDRAW = "redraw"
         private const val MODE_CHANGE_APP = "change_app"
@@ -378,13 +383,15 @@ class GestureTrainingActivity : BaseActivity() {
             context: Context,
             action: GestureAction = GestureAction.LAUNCH_APP,
             url: String? = null,
-            label: String? = null
+            label: String? = null,
+            parentGestureId: String? = null
         ): Intent =
             Intent(context, GestureTrainingActivity::class.java)
                 .putExtra(EXTRA_MODE, MODE_NEW)
                 .putExtra(EXTRA_ACTION, action.name)
                 .putExtra(EXTRA_URL, url)
                 .putExtra(EXTRA_LABEL, label)
+                .putExtra(EXTRA_PARENT_ID, parentGestureId)
 
         fun redrawIntent(context: Context, mappingId: String): Intent =
             Intent(context, GestureTrainingActivity::class.java)

@@ -14,6 +14,7 @@ data class SPoint(val x: Float, val y: Float)
  *  field existed still decode as plain app launches, unchanged. */
 @Serializable
 enum class GestureAction {
+    TWO_STEP_FOLDER,
     LAUNCH_APP,
     OPEN_DRAWER,
     OPEN_URL,
@@ -48,8 +49,8 @@ data class GestureMapping(
     val subStrokeLengths: List<List<Int>> = emptyList(),
     val action: GestureAction = GestureAction.LAUNCH_APP,
     val url: String? = null,
-    /** Optional gesture to recognize next instead of dispatching this mapping's action. */
-    val nextGestureId: String? = null
+    /** Parent folder that limits recognition of this gesture to a preceding gesture. */
+    val parentGestureId: String? = null
 )
 
 /**

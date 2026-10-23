@@ -96,6 +96,9 @@
     <string name="gesture_action_chooser_title">New gesture</string>
     <string name="gesture_action_pick_app">Open an app</string>
     <string name="gesture_action_pick_app_subtitle">Draw a shape, launch that app</string>
+    <string name="gesture_action_two_step_folder">Two-step gesture</string>
+    <string name="gesture_action_two_step_folder_subtitle">Draw a shape, then choose from gestures inside it</string>
+    <string name="open_gesture_folder">Open gestures</string>
     <string name="gesture_action_open_drawer">Open the drawer</string>
     <string name="gesture_action_open_drawer_subtitle">Draw a shape, open the app drawer</string>
     <string name="gesture_action_open_url">Open a URL</string>
