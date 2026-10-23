@@ -3,6 +3,11 @@ package dev.neffly.gesturelauncher.unistroke
 /** A raw 2D point used by the recognizer (double precision for the geometry math). */
 data class Pt(val x: Double, val y: Double)
 
+/** Cardinal direction for a simple straight-line gesture. */
+enum class LineDirection {
+    UP, DOWN, LEFT, RIGHT
+}
+
 /**
  * A preprocessed template the recognizer compares against. [name] carries the owning
  * gesture-mapping id, so several templates (the 3 training strokes) can share one name.
@@ -19,6 +24,9 @@ class GestureTemplate(val name: String, rawPoints: List<Pt>, val subStrokeCount:
 
     /** Raw chord/path straightness — see [OneDollarRecognizer.recognize]'s straightness guard. */
     val straightness: Double = OneDollarRecognizer.straightness(rawPoints)
+
+    /** Direction is only set for line-like strokes close to a cardinal axis. */
+    val lineDirection: LineDirection? = OneDollarRecognizer.cardinalLineDirection(rawPoints)
 }
 
 /** Best match result. [name] is null when there was nothing to match. */

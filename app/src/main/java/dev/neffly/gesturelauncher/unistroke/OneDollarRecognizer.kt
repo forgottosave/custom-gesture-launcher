@@ -13,7 +13,8 @@ import kotlin.math.sqrt
  *
  * A stroke is resampled, rotated to a canonical "indicative angle", translated to the origin,
  * and flattened into a unit vector. Candidates are compared to templates by cosine similarity,
- * with the optimal rotation computed in closed form (one O(n) pass per template).
+ * with the optimal rotation computed in closed form (one O(n) pass per template). The one
+ * intentional exception is a simple cardinal straight line, whose raw direction is retained.
  *
  * Unlike classic $1's scale-to-square step, this normalization **preserves aspect ratio**, so a
  * near-1D stroke isn't stretched into a square and can't masquerade as a 2D shape like a "T".
@@ -41,6 +42,8 @@ object OneDollarRecognizer {
     /** Allowed difference in raw straightness (chord/path-length ratio) between candidate and
      *  template before the score gets scaled down — see [recognize]. */
     private const val STRAIGHTNESS_TOLERANCE = 0.2
+    private const val SIMPLE_LINE_STRAIGHTNESS = 0.95
+    private val CARDINAL_LINE_ANGLE = Math.PI / 6.0
 
     /** Score multiplier when the candidate's pen-lift sub-stroke count differs from the
      *  template's (e.g. a single-stroke line against a two-stroke "T"). */
@@ -90,10 +93,17 @@ object OneDollarRecognizer {
         val candidate = vectorize(points)
         val candidateDiagonal = boundingBoxDiagonal(points)
         val candidateStraightness = straightness(points)
+        val candidateDirection = cardinalLineDirection(points)
 
         var bestScore = 0.0
         var bestName: String? = null
         for (t in templates) {
+            if (candidateDirection != null && t.lineDirection != null &&
+                candidateDirection != t.lineDirection
+            ) {
+                continue
+            }
+
             val sim = optimalCosineSimilarity(candidate, t.vector)
             var score = 1.0 - acos(sim.coerceIn(0.0, 1.0)) / SCORE_ANGLE_CEILING
             score = score.coerceIn(0.0, 1.0)
@@ -172,6 +182,22 @@ object OneDollarRecognizer {
         return (distance(points.first(), points.last()) / len).coerceIn(0.0, 1.0)
     }
 
+    /** Returns a cardinal direction only for a straight, near-axis-aligned stroke. */
+    fun cardinalLineDirection(points: List<Pt>): LineDirection? {
+        if (straightness(points) < SIMPLE_LINE_STRAIGHTNESS || points.size < 2) return null
+        val start = points.first()
+        val end = points.last()
+        val angle = atan2(end.y - start.y, end.x - start.x)
+        val axes = listOf(
+            Math.PI to LineDirection.LEFT,
+            0.0 to LineDirection.RIGHT,
+            -Math.PI / 2.0 to LineDirection.UP,
+            Math.PI / 2.0 to LineDirection.DOWN
+        )
+        val nearest = axes.minBy { angularDistance(angle, it.first) }
+        return nearest.second.takeIf { angularDistance(angle, nearest.first) <= CARDINAL_LINE_ANGLE }
+    }
+
     /** Even resampling to [n] points along the path. Two-pointer walk — O(input + n), no list
      *  insertion (the classic pseudocode's insert-into-source approach is accidentally O(n²)). */
     private fun resample(points: List<Pt>, n: Int): List<Pt> {
@@ -231,4 +257,9 @@ object OneDollarRecognizer {
     }
 
     private fun distance(a: Pt, b: Pt): Double = hypot(a.x - b.x, a.y - b.y)
+
+    private fun angularDistance(a: Double, b: Double): Double {
+        val delta = abs(a - b) % (2.0 * Math.PI)
+        return minOf(delta, 2.0 * Math.PI - delta)
+    }
 }

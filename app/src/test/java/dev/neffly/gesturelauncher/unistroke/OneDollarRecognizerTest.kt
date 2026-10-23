@@ -21,6 +21,12 @@ class OneDollarRecognizerTest {
     private fun line(n: Int = 50): List<Pt> =
         (0 until n).map { Pt(0.0, 400.0 * it / (n - 1)) }
 
+    private fun horizontalLine(leftToRight: Boolean): List<Pt> =
+        (0 until 50).map {
+            val x = 400.0 * it / 49
+            Pt(if (leftToRight) x else 400.0 - x, 0.0)
+        }
+
     /** Single-stroke "T": bar left->right, retrace to the middle, stem down. */
     private fun tShape(): List<Pt> {
         val pts = ArrayList<Pt>()
@@ -143,6 +149,29 @@ class OneDollarRecognizerTest {
         val result = OneDollarRecognizer.recognize(jitter(line(), seed = 9), templates, 1)
         assertEquals("line", result.name)
         assertTrue("line vs line template should be >= 0.80 but was ${result.score}", result.score >= 0.80)
+    }
+
+    @Test
+    fun `cardinal straight lines only match the same direction`() {
+        val templates = listOf(
+            GestureTemplate("up", line()),
+            GestureTemplate("down", line().reversed()),
+            GestureTemplate("right", horizontalLine(true)),
+            GestureTemplate("left", horizontalLine(false))
+        )
+
+        assertEquals("up", OneDollarRecognizer.recognize(line(), templates).name)
+        assertEquals("down", OneDollarRecognizer.recognize(line().reversed(), templates).name)
+        assertEquals("right", OneDollarRecognizer.recognize(horizontalLine(true), templates).name)
+        assertEquals("left", OneDollarRecognizer.recognize(horizontalLine(false), templates).name)
+    }
+
+    @Test
+    fun `non-line gestures remain rotation tolerant`() {
+        val template = tTemplate()
+        val result = OneDollarRecognizer.recognize(rotate(jitter(tShape()), 20.0), listOf(template))
+        assertEquals("t", result.name)
+        assertTrue(result.score >= 0.80)
     }
 
     // --- plumbing ------------------------------------------------------------

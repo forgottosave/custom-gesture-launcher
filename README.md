@@ -16,7 +16,8 @@ persistence, min SDK 26 (Android 8.0+).
 ## Features
 
 - **Draw-to-launch**: a Protractor-variant $1 unistroke recognizer matches single-stroke shapes
-  against your saved gestures — no on-screen icons required.
+  against your saved gestures — no on-screen icons required. Simple up, down, left and right
+  swipes are direction-specific; other shapes retain rotation-tolerant matching.
 - Gestures can also **open the app drawer**, **open a URL**, **open the floating search**, or
   control media playback with **play/pause**, **next**, and **previous**, not just launch an app.
 - A visible **halo trail** follows your finger while drawing, and haptic feedback (toggleable)
