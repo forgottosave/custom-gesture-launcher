@@ -16,7 +16,7 @@ import dev.neffly.gesturelauncher.data.Prefs
 import dev.neffly.gesturelauncher.data.anyMultiStroke
 import dev.neffly.gesturelauncher.data.maxExpectedSubStrokes
 import dev.neffly.gesturelauncher.data.toPt
-import dev.neffly.gesturelauncher.data.toTemplates
+import dev.neffly.gesturelauncher.data.topLevelTemplates
 import dev.neffly.gesturelauncher.ui.BaseActivity
 import dev.neffly.gesturelauncher.ui.GestureCanvasView
 import dev.neffly.gesturelauncher.unistroke.GestureTemplate
@@ -93,7 +93,7 @@ class GestureSensitivityActivity : BaseActivity() {
     private fun rebuildTemplates() {
         val mappings = GestureStore.all(this)
         mappingsById = mappings.associateBy { it.id }
-        templates = mappings.toTemplates()
+        templates = mappings.topLevelTemplates()
         // Both knobs, exactly as the home screen sets them: this screen exists to show what home
         // would do, and finalizing early on the last expected sub-stroke is part of that.
         canvas.multiStrokeGapMillis =

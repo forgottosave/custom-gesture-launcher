@@ -62,6 +62,7 @@ import dev.neffly.gesturelauncher.data.anyMultiStroke
 import dev.neffly.gesturelauncher.data.maxExpectedSubStrokes
 import dev.neffly.gesturelauncher.data.toPt
 import dev.neffly.gesturelauncher.data.toTemplates
+import dev.neffly.gesturelauncher.data.topLevelTemplates
 import dev.neffly.gesturelauncher.launch.UnrequestedHomeLaunch
 import dev.neffly.gesturelauncher.ui.FontEngine
 import dev.neffly.gesturelauncher.ui.GestureCanvasView
@@ -513,7 +514,7 @@ class MainActivity : BaseActivity() {
         val awaitingFolder = pendingFolderId != null
         val candidates = pendingFolderId?.let { id ->
             templates.filter { mappingsById[it.name]?.parentGestureId == id }
-        } ?: templates.filter { mappingsById[it.name]?.parentGestureId == null }
+        } ?: mappingsById.values.toList().topLevelTemplates()
         val result = OneDollarRecognizer.recognize(pts, candidates, subStrokeCount)
         val threshold = Prefs.matchThreshold(this)
         val mapping = result.name?.let { mappingsById[it] }

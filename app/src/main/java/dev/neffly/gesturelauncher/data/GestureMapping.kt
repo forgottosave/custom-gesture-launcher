@@ -71,6 +71,10 @@ fun List<GestureMapping>.toTemplates(): List<GestureTemplate> = flatMap { mappin
     }
 }
 
+/** Templates that can begin a gesture sequence on the home screen. */
+fun List<GestureMapping>.topLevelTemplates(): List<GestureTemplate> =
+    filter { it.parentGestureId == null }.toTemplates()
+
 /** Whether any of these was drawn with a pen lift, which is what makes waiting out the
  *  multi-stroke gap worth the latency it costs every other gesture. */
 fun List<GestureMapping>.anyMultiStroke(): Boolean = any { it.isMultiStroke }
