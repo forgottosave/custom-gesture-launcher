@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- The home page of the pager: top 30% = clock + today's events (non-drawable); lower 70% =
-     gesture canvas. The pages either side of it are page_widgets and page_notes. -->
+     gesture canvas. The pages either side of it are independent page_widgets instances. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"

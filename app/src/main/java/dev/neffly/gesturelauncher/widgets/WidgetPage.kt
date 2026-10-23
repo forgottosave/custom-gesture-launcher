@@ -31,7 +31,8 @@ import dev.neffly.gesturelauncher.ui.overrideNextTransition
 import kotlin.math.roundToInt
 
 /**
- * The home screen's widgets page: app widgets stacked top to bottom, scrolling as one column.
+ * One of the home screen's widget pages: app widgets stacked top to bottom, scrolling as one
+ * column.
  *
  * Each widget is as wide as the page and as tall as its grip has been dragged to. Rearranging is
  * an edit mode: Edit shows a row under every widget with move up, move down, the grip and
@@ -44,7 +45,11 @@ import kotlin.math.roundToInt
  * ([onActivityResult]). The widget ids the host allocates are what persist (see [WidgetStore]);
  * a host with the same id picks them up again.
  */
-class WidgetPage(private val activity: AppCompatActivity, page: View) {
+class WidgetPage(
+    private val activity: AppCompatActivity,
+    page: View,
+    private val slot: Slot
+) {
 
     private val column: LinearLayout = page.findViewById(R.id.widgetColumn)
     private val menuButton: View = page.findViewById(R.id.widgetMenuButton)
@@ -52,9 +57,10 @@ class WidgetPage(private val activity: AppCompatActivity, page: View) {
 
     /** The context every widget view is built with — see [WidgetContext]. */
     private val widgetContext: Context = WidgetContext(activity)
-    private val host = AppWidgetHost(widgetContext, HOST_ID)
+    private val host = AppWidgetHost(widgetContext, slot.hostId)
 
-    private val entries: MutableList<WidgetEntry> = WidgetStore.load(activity).toMutableList()
+    private val entries: MutableList<WidgetEntry> =
+        WidgetStore.load(activity, slot.storeKey).toMutableList()
 
     /** Whether the edit rows are showing. Rearranging is rare next to reading, and a row of
      *  controls between every pair of widgets is clutter the rest of the time. */
@@ -152,7 +158,7 @@ class WidgetPage(private val activity: AppCompatActivity, page: View) {
         if (gone.isNotEmpty()) {
             gone.forEach { host.deleteAppWidgetId(it.id) }
             entries.removeAll(gone)
-            WidgetStore.save(activity, entries)
+            WidgetStore.save(activity, slot.storeKey, entries)
         }
         for (entry in entries) column.addView(itemFor(entry, manager.getAppWidgetInfo(entry.id)))
         refreshEditRows()
@@ -193,7 +199,7 @@ class WidgetPage(private val activity: AppCompatActivity, page: View) {
         val item = column.getChildAt(from)
         column.removeViewAt(from)
         column.addView(item, to)
-        WidgetStore.save(activity, entries)
+        WidgetStore.save(activity, slot.storeKey, entries)
         refreshEditRows()
     }
 
@@ -201,7 +207,7 @@ class WidgetPage(private val activity: AppCompatActivity, page: View) {
         host.deleteAppWidgetId(entries[index].id)
         entries.removeAt(index)
         column.removeViewAt(index)
-        WidgetStore.save(activity, entries)
+        WidgetStore.save(activity, slot.storeKey, entries)
         refreshEditRows()
     }
 
@@ -264,7 +270,7 @@ class WidgetPage(private val activity: AppCompatActivity, page: View) {
             .coerceIn(MIN_HEIGHT_DP, maxHeightDp())
         val entry = WidgetEntry(id, heightDp)
         entries.add(entry)
-        WidgetStore.save(activity, entries)
+        WidgetStore.save(activity, slot.storeKey, entries)
         column.addView(itemFor(entry, info))
         refreshEditRows()
     }
@@ -330,7 +336,7 @@ class WidgetPage(private val activity: AppCompatActivity, page: View) {
                     val index = entries.indexOfFirst { it.id == id }
                     if (index >= 0 && heightDp != entries[index].heightDp) {
                         entries[index] = entries[index].copy(heightDp = heightDp)
-                        WidgetStore.save(activity, entries)
+                        WidgetStore.save(activity, slot.storeKey, entries)
                         reportSize(view, heightDp)
                     }
                     if (event.actionMasked == MotionEvent.ACTION_UP) handle.performClick()
@@ -361,13 +367,15 @@ class WidgetPage(private val activity: AppCompatActivity, page: View) {
     }
 
     private companion object {
-        /** Identifies this host's widget ids to the system; must never change once widgets exist. */
-        const val HOST_ID = 0x4753
-
         /** Widget configuration screens report back by request code, see [onActivityResult]. */
         const val REQUEST_CONFIGURE = 1
         const val MIN_HEIGHT_DP = 56
         const val MAX_HEIGHT_FRACTION = 0.85f
         const val DISABLED_ALPHA = 0.35f
+    }
+
+    enum class Slot(val storeKey: String, val hostId: Int) {
+        LEFT("left", 0x4753),
+        RIGHT("right", 0x4754)
     }
 }

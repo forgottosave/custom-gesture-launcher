@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The page left of home: widgets stacked downward, each an item_widget, under a menu glyph
+<!-- A side page: widgets stacked downward, each an item_widget, under a menu glyph
      pinned to the top corner that holds "add" and "edit". Drawn straight over the wallpaper like
      the home page. The column's top padding keeps the first widget clear of the glyph, and its
      bottom padding keeps the last one clear of the dock. -->

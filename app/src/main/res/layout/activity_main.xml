@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Home: three pages side by side — widgets, the home page (clock, events, gesture canvas) and
-     notes — under a dock that belongs to the home page. The pages are built from page_widgets,
-     page_home and page_notes; see MainActivity. -->
+<!-- Home: three pages side by side — widgets, the home page (clock, events, gesture canvas)
+     and a second widget page — under a dock that belongs to the home page. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/homeRoot"

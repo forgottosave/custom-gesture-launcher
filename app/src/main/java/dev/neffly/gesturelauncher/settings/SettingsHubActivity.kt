@@ -46,6 +46,7 @@ class SettingsHubActivity : SlidePanelActivity() {
     private lateinit var gesturesSubtitle: TextView
     private lateinit var autoKeyboardSwitch: MaterialSwitch
     private lateinit var hapticFeedbackSwitch: MaterialSwitch
+    private lateinit var widgetPagesSwitch: MaterialSwitch
     private lateinit var multiStepSwitch: MaterialSwitch
     private lateinit var searchSideSubtitle: TextView
     private lateinit var themeSubtitle: TextView
@@ -138,6 +139,12 @@ class SettingsHubActivity : SlidePanelActivity() {
             Prefs.setHapticFeedback(this, enabled)
             hapticFeedbackSwitch.isChecked = enabled
         }
+        widgetPagesSwitch = findViewById(R.id.widgetPagesSwitch)
+        findViewById<View>(R.id.widgetPagesRow).setOnClickListener {
+            val enabled = !Prefs.widgetPagesEnabled(this)
+            Prefs.setWidgetPagesEnabled(this, enabled)
+            widgetPagesSwitch.isChecked = enabled
+        }
         searchSideSubtitle = findViewById(R.id.searchSideSubtitle)
         findViewById<View>(R.id.searchSideRow).setOnClickListener { showSearchSideDialog() }
 
@@ -204,6 +211,7 @@ class SettingsHubActivity : SlidePanelActivity() {
         gesturesSubtitle.text = getString(R.string.gestures_row_subtitle, GestureStore.all(this).size)
         autoKeyboardSwitch.isChecked = Prefs.autoKeyboard(this)
         hapticFeedbackSwitch.isChecked = Prefs.hapticFeedback(this)
+        widgetPagesSwitch.isChecked = Prefs.widgetPagesEnabled(this)
         multiStepSwitch.isChecked = Prefs.multiStepGestures(this)
         searchSideSubtitle.setText(searchSideLabel(Prefs.searchOnLeft(this)))
         themeSubtitle.setText(themeLabelFor(Prefs.themeMode(this)))

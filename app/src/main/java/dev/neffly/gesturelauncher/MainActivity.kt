@@ -55,7 +55,6 @@ import dev.neffly.gesturelauncher.ui.DockStrip
 import dev.neffly.gesturelauncher.ui.PageDotsView
 import dev.neffly.gesturelauncher.ui.showWithFont
 import dev.neffly.gesturelauncher.widgets.WidgetPage
-import dev.neffly.gesturelauncher.notes.NotesPage
 import dev.neffly.gesturelauncher.ui.StaticPagesAdapter
 import androidx.viewpager2.widget.ViewPager2
 import android.view.LayoutInflater
@@ -77,8 +76,8 @@ import kotlin.math.roundToInt
  * Home screen: three pages over the system wallpaper, under the home page's dock.
  *
  * The middle page is home proper — a gesture canvas confined to its lower ~70%, with a
- * non-drawable clock + today's-events zone above. Left of it is the widgets page, right of it the
- * notes page. The dock is the search button in one corner and, beside it, a strip that turns the
+ * non-drawable clock + today's-events zone above. Both sides are independent widget pages. The
+ * dock is the search button in one corner and, beside it, a strip that turns the
  * pages when dragged and locks the screen when double-tapped ([DockStrip]); on the two side pages
  * a swipe anywhere turns them, and on the home page a horizontal swipe is a stroke, so the pager
  * takes no touch there. The dock is rendered independently of the recognizer.
@@ -89,8 +88,9 @@ class MainActivity : BaseActivity() {
     private lateinit var dock: View
     private lateinit var dockStrip: PageDotsView
     private lateinit var searchButton: ImageButton
-    private lateinit var widgetPage: WidgetPage
-    private lateinit var notesPage: NotesPage
+    private lateinit var leftWidgetPage: WidgetPage
+    private lateinit var rightWidgetPage: WidgetPage
+    private var widgetPagesEnabled = true
 
     private val handler = Handler(Looper.getMainLooper())
 
@@ -176,22 +176,29 @@ class MainActivity : BaseActivity() {
         // Registered via the dispatcher (not an onBackPressed override) so predictive back on
         // Android 14+ sees it too.
         onBackPressedDispatcher.addCallback(this) {
-            if (pager.currentItem != PAGE_HOME) pager.setCurrentItem(PAGE_HOME, true)
+            if (pager.currentItem != homePageIndex()) pager.setCurrentItem(homePageIndex(), true)
         }
 
         val inflater = LayoutInflater.from(this)
         pager = findViewById(R.id.homePager)
         dock = findViewById(R.id.homeDock)
-        val widgets = inflater.inflate(R.layout.page_widgets, pager, false)
         val home = inflater.inflate(R.layout.page_home, pager, false)
-        val notes = inflater.inflate(R.layout.page_notes, pager, false)
-        val pages = listOf(widgets, home, notes)
+        widgetPagesEnabled = Prefs.widgetPagesEnabled(this)
+        val widgets = if (widgetPagesEnabled) inflater.inflate(R.layout.page_widgets, pager, false) else null
+        val rightWidgets = if (widgetPagesEnabled) inflater.inflate(R.layout.page_widgets, pager, false) else null
+        val pages = buildList {
+            if (widgets != null) add(widgets)
+            add(home)
+            if (rightWidgets != null) add(rightWidgets)
+        }
         // Built after setContentView, so the pass BaseActivity makes over the content view never
-        // saw them; without this the clock, the battery and the notes keep the system font.
+        // saw them; without this the clock and the battery keep the system font.
         pages.forEach { FontEngine.applyTo(it) }
         setUpPager(pages)
-        widgetPage = WidgetPage(this, widgets)
-        notesPage = NotesPage(this, notes)
+        if (widgets != null && rightWidgets != null) {
+            leftWidgetPage = WidgetPage(this, widgets, WidgetPage.Slot.LEFT)
+            rightWidgetPage = WidgetPage(this, rightWidgets, WidgetPage.Slot.RIGHT)
+        }
 
         canvas = home.findViewById(R.id.gestureCanvas)
         canvas.autoClearMillis = 180L
@@ -207,19 +214,12 @@ class MainActivity : BaseActivity() {
         batteryIcon = home.findViewById(R.id.batteryIcon)
         batteryLevel = home.findViewById(R.id.batteryLevel)
 
-        // Keep the pages below the status bar and above the navigation bar — or above the
-        // keyboard the notes page opens, which is when the note box, and only it, sits on the
-        // keyboard: the dock stays put underneath it, and the room the notes page keeps clear
-        // for the dock is given back to the list. The dock itself stays clear of the bar by a
-        // fixed gap whichever navigation mode the device is in.
+        // Keep the pages below the status bar and above the navigation bar. The dock itself stays
+        // clear of the bar by a fixed gap whichever navigation mode the device is in.
         val root = findViewById<View>(R.id.homeRoot)
-        val notesDockClearance = notes.paddingBottom
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val ime = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-            val keyboard = ime > bars.bottom
-            pager.updatePadding(top = bars.top, bottom = if (keyboard) ime else bars.bottom)
-            notes.updatePadding(bottom = if (keyboard) dp(NOTES_KEYBOARD_GAP_DP) else notesDockClearance)
+            pager.updatePadding(top = bars.top, bottom = bars.bottom)
             val dockMargin = bars.bottom + dp(DOCK_GAP_DP)
             val params = dock.layoutParams as FrameLayout.LayoutParams
             if (params.bottomMargin != dockMargin) {
@@ -260,8 +260,9 @@ class MainActivity : BaseActivity() {
             true
         }
         dockStrip = findViewById(R.id.dockStrip)
-        dockStrip.count = PAGE_COUNT
-        dockStrip.position = PAGE_HOME.toFloat()
+        dockStrip.visibility = if (widgetPagesEnabled) View.VISIBLE else View.GONE
+        dockStrip.count = pages.size
+        dockStrip.position = homePageIndex().toFloat()
         DockStrip(dockStrip, pager) { lockScreen() }
         placeSearch()
         showDock(pager.currentItem, animate = false)
@@ -285,35 +286,35 @@ class MainActivity : BaseActivity() {
     }
 
     /**
-     * Three pages, all kept alive: the widgets keep updating and the note box keeps its draft
-     * while another page is in front. Swiping only ever leaves a side page — on the home page a
+     * Three pages, all kept alive: both widget hosts keep updating while another page is in front.
+     * Swiping only ever leaves a side page — on the home page a
      * horizontal drag is a stroke for the canvas, which the pager must never take first.
      */
     private fun setUpPager(pages: List<View>) {
         pager.adapter = StaticPagesAdapter(pages)
-        pager.offscreenPageLimit = pages.size - 1
-        pager.setCurrentItem(PAGE_HOME, false)
+        pager.offscreenPageLimit = (pages.size - 1).coerceAtLeast(1)
+        pager.setCurrentItem(homePageIndex(), false)
         pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
                 dockStrip.position = position + positionOffset
             }
 
             override fun onPageSelected(position: Int) {
-                pager.isUserInputEnabled = position != PAGE_HOME
+                pager.isUserInputEnabled = position != homePageIndex()
                 showDock(position, animate = true)
-                if (position != PAGE_NOTES) hideKeyboard()
+                if (position != homePageIndex()) hideKeyboard()
             }
         })
         pager.isUserInputEnabled = false
     }
 
     /**
-     * The strip and its dots stay on every page — they are how the pages are told apart. The
-     * search disc belongs to the home page: on a side page it would only sit over the widgets
-     * and notes, so it fades out — and stops taking touches — there and comes back on return.
+     * The strip and its dots stay on every page when widget pages are enabled. The search disc
+     * belongs to the home page: on a side page it would only sit over the widgets, so it fades out
+     * — and stops taking touches — there and comes back on return.
      */
     private fun showDock(page: Int, animate: Boolean) {
-        val home = page == PAGE_HOME
+        val home = page == homePageIndex()
         searchButton.animate().cancel()
         if (!animate) {
             searchButton.alpha = if (home) 1f else 0f
@@ -328,8 +329,7 @@ class MainActivity : BaseActivity() {
             .start()
     }
 
-    /** Asked of the window, not of the focused view: by the time a page change reports in, the
-     *  note box can already have lost focus while the keyboard it opened is still up. */
+    /** Asked of the window so a side-page change cannot leave an input method open. */
     private fun hideKeyboard() {
         WindowInsetsControllerCompat(window, window.decorView).hide(WindowInsetsCompat.Type.ime())
         currentFocus?.clearFocus()
@@ -338,7 +338,9 @@ class MainActivity : BaseActivity() {
     /** Home, pressed while on a side page, comes back to the home page — as any launcher does. */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (::pager.isInitialized && pager.currentItem != PAGE_HOME) pager.setCurrentItem(PAGE_HOME, true)
+        if (::pager.isInitialized && pager.currentItem != homePageIndex()) {
+            pager.setCurrentItem(homePageIndex(), true)
+        }
     }
 
     @Deprecated("Deprecated in Java")
@@ -346,7 +348,8 @@ class MainActivity : BaseActivity() {
         @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
         // A widget's configuration screen can only report back this way — see WidgetPage.
-        widgetPage.onActivityResult(requestCode, resultCode)
+        if (::leftWidgetPage.isInitialized) leftWidgetPage.onActivityResult(requestCode, resultCode)
+        if (::rightWidgetPage.isInitialized) rightWidgetPage.onActivityResult(requestCode, resultCode)
     }
 
     /**
@@ -415,12 +418,14 @@ class MainActivity : BaseActivity() {
         registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
             ?.let { showBattery(it) }
         watchCalendar()
-        widgetPage.onStart()
+        if (::leftWidgetPage.isInitialized) leftWidgetPage.onStart()
+        if (::rightWidgetPage.isInitialized) rightWidgetPage.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        widgetPage.onStop()
+        if (::leftWidgetPage.isInitialized) leftWidgetPage.onStop()
+        if (::rightWidgetPage.isInitialized) rightWidgetPage.onStop()
         unwatchCalendar()
         runCatching { unregisterReceiver(batteryReceiver) }
     }
@@ -455,11 +460,14 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (::pager.isInitialized && Prefs.widgetPagesEnabled(this) != widgetPagesEnabled) {
+            recreate()
+            return
+        }
         clearFrozenTapFeedback()
         placeSearch()
         rebuildTemplates()
         refreshEvents()
-        notesPage.refresh()
         // Start (or restart) the "healthy" heartbeat.
         handler.removeCallbacks(heartbeat)
         handler.postDelayed(heartbeat, 10_000L)
@@ -791,15 +799,9 @@ class MainActivity : BaseActivity() {
     }
 
     companion object {
-        /** Page order in the pager: widgets, home, notes. */
-        private const val PAGE_HOME = 1
-        private const val PAGE_NOTES = 2
-        private const val PAGE_COUNT = 3
         private const val DOCK_FADE_MS = 180L
         /** Between the dock and the navigation bar (or the gesture strip). */
         private const val DOCK_GAP_DP = 24
-        /** Between the note box and the keyboard, while the keyboard is up. */
-        private const val NOTES_KEYBOARD_GAP_DP = 8
         /** The band at the canvas's bottom edge where a swipe up from the navigation bar lands —
          *  see GestureCanvasView.bottomDeadZone. Wide enough for a fast swipe's first sample. */
         private const val CANVAS_DEAD_ZONE_DP = 32
@@ -820,4 +822,6 @@ class MainActivity : BaseActivity() {
             "com.miui.clock"
         )
     }
+
+    private fun homePageIndex(): Int = if (widgetPagesEnabled) 1 else 0
 }

@@ -11,7 +11,7 @@ import kotlinx.serialization.json.Json
 data class WidgetEntry(val id: Int, val heightDp: Int)
 
 /**
- * The widgets page's list, in page order.
+ * Each widget page's list, in page order.
  *
  * Kept apart from the launcher backup on purpose: an app-widget id only means something to the
  * host that allocated it on the device that allocated it, so there is nothing here worth carrying
@@ -24,14 +24,17 @@ object WidgetStore {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    fun load(context: Context): List<WidgetEntry> {
-        val raw = prefs(context).getString(KEY_ENTRIES, null) ?: return emptyList()
+    fun load(context: Context, storeKey: String): List<WidgetEntry> {
+        val raw = prefs(context, storeKey).getString(KEY_ENTRIES, null) ?: return emptyList()
         return runCatching { json.decodeFromString<List<WidgetEntry>>(raw) }.getOrDefault(emptyList())
     }
 
-    fun save(context: Context, entries: List<WidgetEntry>) {
-        prefs(context).edit().putString(KEY_ENTRIES, json.encodeToString(entries)).apply()
+    fun save(context: Context, storeKey: String, entries: List<WidgetEntry>) {
+        prefs(context, storeKey).edit().putString(KEY_ENTRIES, json.encodeToString(entries)).apply()
     }
 
-    private fun prefs(context: Context) = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+    private fun prefs(context: Context, storeKey: String) = context.getSharedPreferences(
+        if (storeKey == "left") FILE else "${FILE}_$storeKey",
+        Context.MODE_PRIVATE
+    )
 }

@@ -39,8 +39,9 @@ data class BackupData(
     val fontScale: Float = 1f,
     val searchOnLeft: Boolean = false,
     val multiStepGestures: Boolean = true,
-    /** The notes page, oldest first. Widgets are left out: an app-widget id only means
-     *  something to the device that allocated it. */
+    val widgetPages: Boolean = true,
+    /** The notes page, oldest first. App-widget ids are left out: they only mean something to the
+     *  device that allocated them. */
     val notes: List<Note> = emptyList()
 )
 
@@ -70,7 +71,8 @@ object BackupManager {
         themeMode = Prefs.themeMode(context),
         fontScale = Prefs.fontScale(context),
         searchOnLeft = Prefs.searchOnLeft(context),
-        multiStepGestures = Prefs.multiStepGestures(context)
+        multiStepGestures = Prefs.multiStepGestures(context),
+        widgetPages = Prefs.widgetPagesEnabled(context)
     )
 
     fun writeTo(context: Context, uri: Uri, data: BackupData): Result<Unit> = runCatching {
@@ -108,6 +110,7 @@ object BackupManager {
         Prefs.setFontScale(context, data.fontScale)
         Prefs.setSearchOnLeft(context, data.searchOnLeft)
         Prefs.setMultiStepGestures(context, data.multiStepGestures)
+        Prefs.setWidgetPagesEnabled(context, data.widgetPages)
         // File search is deliberately not restored on: the permission it needs is device-specific
         // and won't have been granted here, so a restored "on" would just be a broken promise.
         // The settings row grants it in one tap.

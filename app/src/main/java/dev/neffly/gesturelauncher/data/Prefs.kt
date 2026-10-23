@@ -24,6 +24,7 @@ object Prefs {
     private const val KEY_KEYBOARD_SHORTCUT = "keyboard_shortcut_enabled"
     private const val KEY_SEARCH_ON_LEFT = "search_on_left"
     private const val KEY_MULTI_STEP_GESTURES = "multi_step_gestures"
+    private const val KEY_WIDGET_PAGES = "widget_pages"
 
     /** Repeated crashes before the home screen drops into Safe Mode. */
     const val SAFE_MODE_CRASH_LIMIT = 3
@@ -159,5 +160,13 @@ object Prefs {
 
     fun setMultiStepGestures(context: Context, value: Boolean) {
         prefs(context).edit().putBoolean(KEY_MULTI_STEP_GESTURES, value).apply()
+    }
+
+    /** Whether the home screen's side widget pages are shown (default ON). */
+    fun widgetPagesEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_WIDGET_PAGES, true)
+
+    fun setWidgetPagesEnabled(context: Context, value: Boolean) {
+        prefs(context).edit().putBoolean(KEY_WIDGET_PAGES, value).apply()
     }
 }
