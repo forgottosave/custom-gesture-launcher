@@ -103,6 +103,7 @@ class MainActivity : BaseActivity() {
     private lateinit var tappableWidgets: List<View>
     private lateinit var emptyHint: TextView
     private lateinit var recognitionHint: TextView
+    private lateinit var secondGestureHint: TextView
     private lateinit var batteryIcon: ImageView
     private lateinit var batteryLevel: TextView
 
@@ -207,6 +208,7 @@ class MainActivity : BaseActivity() {
 
         emptyHint = home.findViewById(R.id.emptyHint)
         recognitionHint = home.findViewById(R.id.recognitionHint)
+        secondGestureHint = home.findViewById(R.id.secondGestureHint)
         widgetPanel = home.findViewById(R.id.widgetPanel)
         eventsScroll = home.findViewById(R.id.eventsScroll)
         eventsContainer = home.findViewById(R.id.eventsContainer)
@@ -563,6 +565,7 @@ class MainActivity : BaseActivity() {
         handler.postDelayed(folderTimeout, SECOND_GESTURE_TIMEOUT_MILLIS)
         recognitionHint.text = getString(R.string.gesture_second_step_hint)
         recognitionHint.visibility = View.VISIBLE
+        secondGestureHint.visibility = View.VISIBLE
     }
 
     private fun cancelPendingFolder() {
@@ -583,6 +586,7 @@ class MainActivity : BaseActivity() {
     private fun hideRecognitionHint() {
         handler.removeCallbacks(hideHintRunnable)
         recognitionHint.visibility = View.GONE
+        secondGestureHint.visibility = View.GONE
     }
 
     private val hideHintRunnable = Runnable { recognitionHint.visibility = View.GONE }

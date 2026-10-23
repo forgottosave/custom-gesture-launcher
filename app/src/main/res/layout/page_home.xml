@@ -178,14 +178,32 @@
             android:textSize="15sp"
             android:visibility="gone" />
 
+        <!-- A large, translucent symbol makes the pending second gesture in a two-step gesture
+             obvious without blocking the canvas underneath. -->
+        <TextView
+            android:id="@+id/secondGestureHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:alpha="0.2"
+            android:importantForAccessibility="no"
+            android:includeFontPadding="false"
+            android:translationY="-120dp"
+            android:text="2"
+            android:textColor="@color/wallpaper_overlay_text"
+            android:textSize="300sp"
+            android:fontFamily="sans-serif-light"
+            android:visibility="gone" />
+
         <!-- Shown briefly after a long/deliberate stroke matches nothing, so a real attempt
              gets feedback instead of silently doing nothing. Never intercepts touch. -->
         <TextView
             android:id="@+id/recognitionHint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="32dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginBottom="32dp"
             android:alpha="0.85"
             android:gravity="center"
             android:shadowColor="@color/wallpaper_overlay_shadow"
