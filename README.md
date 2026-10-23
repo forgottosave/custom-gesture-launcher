@@ -1,5 +1,7 @@
 # TGesearch Launcher
 
+*This repo contains my alternative version of JinWei225's custom-gesture-launcher*
+
 A minimal, speed-focused Android home-screen replacement. The home screen is your system wallpaper
 plus a clock, date, battery and today's calendar over an invisible full-screen canvas: draw a
 single-stroke letter/shape and the mapped app launches instantly. A small bottom-right button
@@ -99,6 +101,7 @@ pick TGesearch Launcher as your digital assistant — both are off until you gra
   about.
 - No automated UI tests yet; unit tests cover the recognizer, search ranking and URL detection.
 
+<!--
 ## Building from source
 
 1. **Open** this folder in Android Studio (File → Open). On first sync Studio will offer to
@@ -137,6 +140,7 @@ It signs with a keystore held in repository secrets, set up once:
 A signed build locally works the same way: put the keystore's path and passwords in a
 `keystore.properties` at the repo root (gitignored — `storeFile`, `storePassword`, `keyAlias`,
 `keyPassword`) and run `./gradlew assembleRelease`. Without that file a release build is unsigned.
+-->
 
 ## Suggested test order (safety before gestures)
 
@@ -150,8 +154,7 @@ A signed build locally works the same way: put the keystore's path and passwords
 
 ## Contributing
 
-This is a personal project shared publicly; issues and pull requests are welcome, but please open
-an issue to discuss larger changes before sending a PR.
+Issues on JinWei225's custom-gesture-launcher were ignored. But I love his project and want to take it further. If you have suggestions please publish and issue to discuss features. Ideas and contributions are always welcome :)
 
 ## License
 
