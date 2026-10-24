@@ -1,14 +1,35 @@
 # TGesearch Launcher
 
-*This repo contains my alternative version of JinWei225's custom-gesture-launcher*
+*This repo contains my heavily modified version of JinWei225's [`custom-gesture-launcher`](https://github.com/JinWei225/custom-gesture-launcher). Special thanks to him!*
+
+<table border="0" cellspacing="0" cellpadding="5">
+  <tr>
+    <td align="center">
+      <img width="100" alt="x-stroke" src="https://github.com/user-attachments/assets/178b1f67-9e2e-416a-be14-f94ed7166ec9" /><br>
+      <sub>Configure any shape</sub>
+    </td>
+    <td align="center">
+      <img width="150" alt="multi-stroke" src="https://github.com/user-attachments/assets/16c09480-7d49-4582-914d-4184af2e4651" /><br>
+      <sub>Multi-Stroke</sub>
+    </td>
+    <td align="center">
+      <img width="200" alt="background" src="https://github.com/user-attachments/assets/81627fc1-26f9-4b5e-88b2-a6bb35daaf97" /><br>
+      <sub>Background Compatible</sub>
+    </td>
+    <td align="center">
+      <img width="150" alt="app-drawer" src="https://github.com/user-attachments/assets/8c360c25-c8c7-4b18-8b9f-7a88ae301167" /><br>
+      <sub>App drawer</sub>
+    </td>
+    <td align="center">
+      <img width="100" alt="widget-page" src="https://github.com/user-attachments/assets/a54347fd-d3a6-4a01-b483-dca95e56b717" /><br>
+      <sub>Optional Widget Pages</sub>
+    </td>
+  </tr>
+</table>
 
 A minimal, speed-focused Android home-screen replacement. The home screen is your system wallpaper
-plus a clock, date, battery and today's calendar over an invisible full-screen canvas: draw a
-single-stroke letter/shape and the mapped app launches instantly. A small bottom-right button
-always opens search, or the full app drawer on a long press, as a guaranteed fallback.
-
-Built from [`gesture-launcher-spec.md`](gesture-launcher-spec.md). Kotlin, classic Views/XML, JSON
-persistence, min SDK 26 (Android 8.0+).
+plus a clock, date, battery and today's calendar. Draw any single-stroke letter/shape and the mapped
+app launches instantly. A small button on the bottom always opens an app drawer.
 
 > **Status:** actively developed as a personal daily-driver project, shared in case it's useful to
 > others. Core functionality (gesture recognition, app drawer, unified search, backup/restore,
@@ -52,7 +73,8 @@ persistence, min SDK 26 (Android 8.0+).
   one-tap deep link to the Home-app picker, and a crash counter that drops into a **Safe Mode**
   screen after repeated crashes so you're never locked out of your phone.
 
-## Download
+## Setup
+### 1. Download
 
 Grab the latest APK from this repo's [Releases](../../releases) page and sideload it (you'll need
 to allow installs from your file manager / browser in Android's settings). There's no Play Store
@@ -68,7 +90,7 @@ Releases are signed with a dedicated key. A copy built from source in Android St
 with your own debug key instead, and Android won't install one over the other — uninstall first
 when switching between the two.
 
-## Making it your launcher (and how to leave safely)
+### 2. Making it your launcher (and how to leave safely)
 
 - After installing, press Home → pick **TGesearch Launcher**. **Keep your existing launcher
   installed** as the real safety net — this app is not a drop-in replacement for a full-featured
@@ -79,7 +101,7 @@ when switching between the two.
   picker, and reset the counter once things are working again. No app is allowed to unset itself
   as the default launcher, so Safe Mode gets you to the picker rather than switching for you.
 
-## First use
+### 3. First use
 
 The launcher ships with **no gestures**. Press the bottom-right button to open the drawer →
 gear icon → **Gesture settings** → **+** → choose what the gesture should do → draw the shape 3× →
@@ -90,7 +112,9 @@ The same settings hub is where you turn on file/web search, the floating search 
 font, and the theme. File search asks for all-files access, and the floating search needs you to
 pick TGesearch Launcher as your digital assistant — both are off until you grant them deliberately.
 
-## Nice tricks
+### 4. Nice tricks
+*some neat tricks to further enhance your gesture experience :)*
+
 - Add a URL shape with the link `spotify:collection:tracks` to open your Liked Songs in Spotify, or the link form "share playlist" to open a playlist.
 - Add 2-layer gestures: one for the first stroke, and a second for the follow-up stroke. The second stroke can be any of the supported actions, so you can have a "folder" gesture that branches into multiple actions.
 
@@ -106,6 +130,11 @@ pick TGesearch Launcher as your digital assistant — both are off until you gra
   then expanded to full screen anyway. Nothing public exposes that, so those cases aren't warned
   about.
 - No automated UI tests yet; unit tests cover the recognizer, search ranking and URL detection.
+
+## Development
+
+Built from [`gesture-launcher-spec.md`](gesture-launcher-spec.md). Kotlin, classic Views/XML, JSON
+persistence, min SDK 26 (Android 8.0+).
 
 <!--
 ## Building from source
@@ -148,7 +177,7 @@ A signed build locally works the same way: put the keystore's path and passwords
 `keyPassword`) and run `./gradlew assembleRelease`. Without that file a release build is unsigned.
 -->
 
-## Suggested test order (safety before gestures)
+### Suggested test order (safety before gestures)
 
 1. Confirm the drawer + wallpaper + button work and you can set/unset the launcher as default.
 2. Add 2–3 gestures and confirm recognition; a sloppy/unknown stroke should do nothing (or show
@@ -158,7 +187,7 @@ A signed build locally works the same way: put the keystore's path and passwords
 4. Check both themes: the glass surfaces have to stay legible over a light *and* a dark wallpaper,
    which is the thing most likely to regress.
 
-## Contributing
+### Contributing
 
 Issues on JinWei225's custom-gesture-launcher were ignored. But I love his project and want to take it further. If you have suggestions please publish and issue to discuss features. Ideas and contributions are always welcome :)
 
